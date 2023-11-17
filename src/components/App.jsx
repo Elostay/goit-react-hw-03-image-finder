@@ -17,7 +17,7 @@ class App extends Component {
     results: [],
     q: '',
     page: 1,
-    status: 'idle',
+
     hasMore: true,
     loading: false,
   };
@@ -101,9 +101,13 @@ class App extends Component {
     return (
       <AppContainer>
         <Searchbar onSubmit={this.inputHandler} />
-        {loading && <DNA />}
+
         <ImageGallery array={results} />
-        {hasMore && results.length >= 12 && <Button onClick={this.loadMore} />}
+        {loading ? (
+          <DNA />
+        ) : (
+          hasMore && results.length >= 12 && <Button onClick={this.loadMore} />
+        )}
         <ToastContainer
           position="top-right"
           autoClose={3000}
