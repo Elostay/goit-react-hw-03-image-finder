@@ -1,9 +1,17 @@
 import { SearchBar, Button, Form, Input } from './Searchbar.styled';
 
 const Searchbar = ({ onSubmit }) => {
+  const handleSumbit = e => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const inputValue = form.elements.search.value.trim().toLowerCase();
+
+    return onSubmit(inputValue);
+  };
+
   return (
     <SearchBar>
-      <Form onSubmit={onSubmit}>
+      <Form onSubmit={handleSumbit}>
         <Button type="submit">Search</Button>
 
         <Input
@@ -18,5 +26,4 @@ const Searchbar = ({ onSubmit }) => {
     </SearchBar>
   );
 };
-
 export default Searchbar;

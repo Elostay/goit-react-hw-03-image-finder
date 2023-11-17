@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AppContainer } from './App.styled';
@@ -7,97 +7,61 @@ import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Button from './Button/Button';
 import DNA from './Loader/Loader';
-
-axios.defaults.baseURL = 'https://pixabay.com/api/';
-
-const MAX_RESULTS = 500;
+import getImages from 'helpers/api';
 
 class App extends Component {
   state = {
     results: [],
     q: '',
     page: 1,
-
+    totalImages: 0,
     hasMore: true,
     loading: false,
   };
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.q !== this.state.q) {
-      this.setState({ results: [], loading: true });
+      this.setState({ loading: true });
       this.searchByData();
     }
-    if (prevState.page !== this.state.page) {
-      if (this.state.page * 12 >= MAX_RESULTS) {
+    if (prevState.page !== this.state.page && this.state.page !== 1) {
+      if (this.state.page * 12 >= this.state.totalImages) {
         this.setState({ hasMore: false });
       }
+      this.setState({ loading: true });
+      this.searchByData();
     }
   }
 
   searchByData = async () => {
-    const searchParams = new URLSearchParams({
-      key: '39827869-ea8193496bafc954651761ff2',
-      image_type: 'photo',
-      orientation: 'horizontal',
-      per_page: 12,
-      q: this.state.q,
-      page: this.state.page,
-    });
-
     try {
-      const response = await axios.get(
-        `https://pixabay.com/api/?${searchParams}`
-      );
+      const data = await getImages(this.state.q, this.state.page);
 
       this.setState(prevState => ({
-        results: [...prevState.results, ...response.data.hits],
+        results: [...prevState.results, ...data.hits],
+        totalImages: data.totalHits,
+        hasMore: true,
       }));
     } catch (error) {
-      console.error('Error fetching data:', error);
       this.setState({ hasMore: false });
     } finally {
       this.setState({ loading: false });
     }
   };
 
-  inputHandler = e => {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const inputValue = form.elements.search.value.trim().toLowerCase();
-
-    if (inputValue === '') {
-      toast.info('🦄 Enter something', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'colored',
-      });
+  inputHandler = query => {
+    if (query === '') {
+      toast.info('🦄 Enter something');
       return;
     }
-    this.setState({ q: inputValue, page: 1 });
+    this.setState({ q: query, page: 1, results: [], totalImages: 0 });
   };
 
   loadMore = async () => {
-    this.setState({ loading: true });
-
-    try {
-      await new Promise(resolve => {
-        this.setState(prevState => ({ page: prevState.page + 1 }), resolve);
-      });
-
-      await this.searchByData();
-    } catch (error) {
-      console.error('Error in loadMore:', error);
-    } finally {
-      this.setState({ loading: false });
-    }
+    this.setState(prevState => ({ page: prevState.page + 1 }));
   };
   render() {
-    const { results, hasMore, loading } = this.state;
+    const { results, totalImages, loading, hasMore } = this.state;
     return (
       <AppContainer>
         <Searchbar onSubmit={this.inputHandler} />
@@ -106,7 +70,8 @@ class App extends Component {
         {loading ? (
           <DNA />
         ) : (
-          hasMore && results.length >= 12 && <Button onClick={this.loadMore} />
+          totalImages !== results.length &&
+          hasMore && <Button onClick={this.loadMore} />
         )}
         <ToastContainer
           position="top-right"
