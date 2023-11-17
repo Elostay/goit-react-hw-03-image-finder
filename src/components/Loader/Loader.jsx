@@ -1,7 +1,7 @@
 import { Dna } from 'react-loader-spinner';
 import { LoaderContainer } from './Loader.styled';
 
-const DNA = ({}) => {
+const DNA = () => {
   return (
     <LoaderContainer>
       <Dna
