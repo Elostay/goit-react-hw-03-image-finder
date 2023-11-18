@@ -15,35 +15,40 @@ class App extends Component {
     q: '',
     page: 1,
     totalImages: 0,
-    hasMore: true,
+    //  hasMore: true,
     loading: false,
   };
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.q !== this.state.q) {
-      this.setState({ loading: true });
-      this.searchByData();
-    }
-    if (prevState.page !== this.state.page && this.state.page !== 1) {
-      if (this.state.page * 12 >= this.state.totalImages) {
-        this.setState({ hasMore: false });
-      }
-      this.setState({ loading: true });
+    //  if (prevState.q !== this.state.q) {
+    //    this.setState({ loading: true });
+    //    this.searchByData();
+    //  }
+    //  if (prevState.page !== this.state.page && this.state.page !== 1) {
+    //    if (this.state.page * 12 >= this.state.totalImages) {
+    //      this.setState({ hasMore: false });
+    //    }
+    //    this.setState({ loading: true });
+    //    this.searchByData();
+    //  }
+    if (prevState.q !== this.state.q || prevState.page !== this.state.page) {
       this.searchByData();
     }
   }
 
   searchByData = async () => {
     try {
+      this.setState({ loading: true });
       const data = await getImages(this.state.q, this.state.page);
 
       this.setState(prevState => ({
         results: [...prevState.results, ...data.hits],
         totalImages: data.totalHits,
-        hasMore: true,
+        //   hasMore: true,
       }));
     } catch (error) {
-      this.setState({ hasMore: false });
+      // this.setState({ hasMore: false });
+      toast.error('🦄 Something went wrong');
     } finally {
       this.setState({ loading: false });
     }
@@ -61,7 +66,7 @@ class App extends Component {
     this.setState(prevState => ({ page: prevState.page + 1 }));
   };
   render() {
-    const { results, totalImages, loading, hasMore } = this.state;
+    const { results, totalImages, loading } = this.state;
     return (
       <AppContainer>
         <Searchbar onSubmit={this.inputHandler} />
@@ -70,9 +75,9 @@ class App extends Component {
         {loading ? (
           <DNA />
         ) : (
-          totalImages !== results.length &&
-          hasMore && <Button onClick={this.loadMore} />
+          totalImages !== results.length && <Button onClick={this.loadMore} />
         )}
+
         <ToastContainer
           position="top-right"
           autoClose={3000}
@@ -91,3 +96,19 @@ class App extends Component {
 }
 
 export default App;
+/*
+ const { results, totalImages, loading, hasMore } = this.state;
+{loading ? (
+          <DNA />
+        ) : (
+          totalImages !== results.length &&
+          hasMore && <Button onClick={this.loadMore} />
+			 )}
+
+*/
+
+/**
+ * Ваш варіант:
+ При запиті cat на 40 сторінці залишається кнопка яка робить запити. Я намагалася реалізувати так, щоб вона зникла і запити не робила.
+ В той же час при запиті Львів вона зникає
+ */
