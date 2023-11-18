@@ -15,22 +15,10 @@ class App extends Component {
     q: '',
     page: 1,
     totalImages: 0,
-    //  hasMore: true,
     loading: false,
   };
 
   componentDidUpdate(prevProps, prevState) {
-    //  if (prevState.q !== this.state.q) {
-    //    this.setState({ loading: true });
-    //    this.searchByData();
-    //  }
-    //  if (prevState.page !== this.state.page && this.state.page !== 1) {
-    //    if (this.state.page * 12 >= this.state.totalImages) {
-    //      this.setState({ hasMore: false });
-    //    }
-    //    this.setState({ loading: true });
-    //    this.searchByData();
-    //  }
     if (prevState.q !== this.state.q || prevState.page !== this.state.page) {
       this.searchByData();
     }
@@ -44,10 +32,8 @@ class App extends Component {
       this.setState(prevState => ({
         results: [...prevState.results, ...data.hits],
         totalImages: data.totalHits,
-        //   hasMore: true,
       }));
     } catch (error) {
-      // this.setState({ hasMore: false });
       toast.error('🦄 Something went wrong');
     } finally {
       this.setState({ loading: false });
@@ -75,7 +61,8 @@ class App extends Component {
         {loading ? (
           <DNA />
         ) : (
-          totalImages !== results.length && <Button onClick={this.loadMore} />
+          totalImages > results.length &&
+          !!totalImages && <Button onClick={this.loadMore} />
         )}
 
         <ToastContainer
@@ -96,19 +83,3 @@ class App extends Component {
 }
 
 export default App;
-/*
- const { results, totalImages, loading, hasMore } = this.state;
-{loading ? (
-          <DNA />
-        ) : (
-          totalImages !== results.length &&
-          hasMore && <Button onClick={this.loadMore} />
-			 )}
-
-*/
-
-/**
- * Ваш варіант:
- При запиті cat на 40 сторінці залишається кнопка яка робить запити. Я намагалася реалізувати так, щоб вона зникла і запити не робила.
- В той же час при запиті Львів вона зникає
- */
